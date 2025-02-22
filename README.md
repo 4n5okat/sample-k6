@@ -215,6 +215,15 @@ make dh-image-push DOCKER_HUB_USER_NAME=${DOCKER_HUB_USER_NAME} DOCKER_HUB_REP=$
 kubectl create ns k6-test
 ~~~
 
+k6で利用する環境変数のSecretを登録する
+
+~~~sh
+kubectl apply -f ./custom-resource/k6JobSecret.yml -n k6-test
+
+# 登録されたかを確認する
+kubectl get secret k6-secret -o yaml
+~~~
+
 k6シナリオをコンフィグマップに作成する
 
 ~~~sh
@@ -251,6 +260,12 @@ k6シナリオのコンフィグマップを削除する
 
 ~~~sh
 kubectl delete -n k6-test configmap crocodile-stress-test
+~~~
+
+Secretの削除
+
+~~~sh
+kubectl delete secret k6-secret  -n k6-test
 ~~~
 
 ## 参考リンク

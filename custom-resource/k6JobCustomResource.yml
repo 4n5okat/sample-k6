@@ -10,10 +10,10 @@ spec:
     configMap:
       name: crocodile-stress-test
       # シナリオファイルを設定する
-      file: test.js
+      file: scenario.js
   runner:
     # runner用のカスタムイメージ
-    image: devtako/custom-k6-runner:1.1.0
+    image: 4n5okat/k6:1.0.0
     imagePullPolicy: Always
     # metadata:
     #   labels:
@@ -32,6 +32,42 @@ spec:
         cpu: 100m
         memory: 500Mi
     env:
+      # k6 Secret (環境変数)
+      - name: API_DOMAIN
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: API_DOMAIN
+      - name: INCREASE_VUS
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: INCREASE_VUS
+      - name: MAXIMUM_VUS
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: MAXIMUM_VUS
+      - name: K6_INFLUXDB_ORGANIZATION
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: K6_INFLUXDB_ORGANIZATION
+      - name: K6_INFLUXDB_BUCKET
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: K6_INFLUXDB_BUCKET
+      - name: K6_INFLUXDB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: K6_INFLUXDB_TOKEN
+      - name: XK6_INFLUXDB
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: XK6_INFLUXDB
       # influxDBへのアウトプット時の設定
       # - name: K6_OUT
       #   value: xk6-influxdb=http://192.168.11.55:28086
@@ -43,10 +79,10 @@ spec:
       #   value: admin-token
       # influxDBへのアウトプット時の設定 end
       # Datadogへのアウトプット時の設定
-      - name: K6_STATSD_ENABLE_TAGS
-        value: "true"
-      - name: K6_STATSD_ADDR
-        value: 192.168.11.45:8125
+      # - name: K6_STATSD_ENABLE_TAGS
+      #   value: "true"
+      # - name: K6_STATSD_ADDR
+      #   value: 192.168.11.45:8125
       # Datadogへのアウトプット時の設定 end
   # starter:
   #   image: <custom-image>
