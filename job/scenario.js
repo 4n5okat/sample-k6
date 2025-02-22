@@ -7,7 +7,7 @@
 /*
   ******************************
   * k6 API
-  * 公式ドキュメント :　https://k6.io/docs/javascript-api/
+  * 公式ドキュメント : https://k6.io/docs/javascript-api/
   ******************************
   *
 */
