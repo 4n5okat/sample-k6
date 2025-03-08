@@ -1,0 +1,88 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: k6-operator-run
+  namespace: k6-operator
+spec:
+  # Pod数
+  parallelism: 8
+  arguments: --out output-statsd
+  script:
+    configMap:
+      name: crocodile-stress-test
+      # シナリオファイルを設定する
+      file: scenario.js
+  runner:
+    # runner用のカスタムイメージ
+    image: 4n5okat/k6:1.0.0
+    imagePullPolicy: Always
+    # metadata:
+    #   labels:
+    #     cool-label: foo
+    #   annotations:
+    #     cool-annotation: bar
+    # securityContext:
+    #   runAsUser: 1000
+    #   runAsGroup: 1000
+    #   runAsNonRoot: true
+    resources:
+      limits:
+        cpu: 200m
+        memory: 1000Mi
+      requests:
+        cpu: 100m
+        memory: 500Mi
+    env:
+      # k6 Secret (環境変数)
+      - name: API_DOMAIN
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: api_domain
+      - name: K6_INFLUXDB_ORGANIZATION
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: k6_influxdb_organization
+      - name: K6_INFLUXDB_BUCKET
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: k6_influxdb_bucket
+      - name: K6_INFLUXDB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: k6_influxdb_token
+      - name: XK6_INFLUXDB
+        valueFrom:
+          secretKeyRef:
+            name: k6-secret
+            key: xk6_influxdb
+      # influxDBへのアウトプット時の設定
+      # - name: K6_OUT
+      #   value: xk6-influxdb=http://192.168.11.55:28086
+      # - name: K6_INFLUXDB_ORGANIZATION
+      #   value: k6db
+      # - name: K6_INFLUXDB_BUCKET
+      #   value: k6db
+      # - name: K6_INFLUXDB_TOKEN
+      #   value: admin-token
+      # influxDBへのアウトプット時の設定 end
+      # Datadogへのアウトプット時の設定
+      # - name: K6_STATSD_ENABLE_TAGS
+      #   value: "true"
+      # - name: K6_STATSD_ADDR
+      #   value: 192.168.11.45:8125
+      # Datadogへのアウトプット時の設定 end
+  # starter:
+  #   image: <custom-image>
+  #   metadata:
+  #     labels:
+  #       cool-label: foo
+  #     annotations:
+  #       cool-annotation: bar
+  #   securityContext:
+  #     runAsUser: 2000
+  #     runAsGroup: 2000
+  #     runAsNonRoot: true
