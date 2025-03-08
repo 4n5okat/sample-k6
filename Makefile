@@ -134,3 +134,53 @@ pull:
 #----------------------------------------------------
 ### container
 #----------------------------------------------------
+
+#### influxDBコンテナにログイン
+# コンテナログイン後に下記コマンドを実行するとinfluxDBをコマンドラインで操作できる。
+# influx
+influxdb-login:
+	docker compose exec influxdb2 bash
+
+#### Grafanaコンテナにログイン
+grafana-login:
+	docker compose exec grafana bash
+
+#### k6コマンド群
+# InfluxDBの設定に関しては作成したものに合わせてください。
+# 環境変数群
+API_DOMAIN ?=
+K6_INFLUXDB_ORGANIZATION ?=
+K6_INFLUXDB_BUCKET ?=
+K6_INFLUXDB_TOKEN ?=
+XK6_INFLUXDB ?=
+
+# k6負荷テスト API
+k6-http:
+	docker compose run --rm -T \
+	k6-container run \
+	-e API_DOMAIN=${API_DOMAIN} \
+	-e K6_INFLUXDB_ORGANIZATION=${K6_INFLUXDB_ORGANIZATION} \
+	-e K6_INFLUXDB_BUCKET=${K6_INFLUXDB_BUCKET} \
+	-e K6_INFLUXDB_TOKEN=${K6_INFLUXDB_TOKEN} \
+	-o xk6-influxdb=${XK6_INFLUXDB} \
+	/job/scenario.js
+
+# k6負荷テスト SQL
+k6-sql:
+	docker compose run --rm -T \
+	k6-container run \
+	-e K6_INFLUXDB_ORGANIZATION=${K6_INFLUXDB_ORGANIZATION} \
+	-e K6_INFLUXDB_BUCKET=${K6_INFLUXDB_BUCKET} \
+	-e K6_INFLUXDB_TOKEN=${K6_INFLUXDB_TOKEN} \
+	-o xk6-influxdb=${XK6_INFLUXDB} \
+	/job/sql.js
+
+#### docker pushコマンド
+# k6-operatorで利用するカスタムイメージをDocker Hubにプッシュする。 ※ プッシュする前にローカルで利用したイメージを移植しておくこと
+# コマンド例　 make dh-image-push DOCKER_HUB_USER_NAME=hogehoge DOCKER_HUB_REP=fugafuga IMAGE_TAG=teketeke
+DOCKER_HUB_USER_NAME ?=
+DOCKER_HUB_REP ?=
+IMAGE_TAG ?=
+dh-image-push:
+	docker build --platform linux/amd64 -f ./infrastructure/k6/Dockerfile -t "${DOCKER_HUB_USER_NAME}/${DOCKER_HUB_REP}:${IMAGE_TAG}" .
+	docker push "${DOCKER_HUB_USER_NAME}/${DOCKER_HUB_REP}:${IMAGE_TAG}"
